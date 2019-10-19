@@ -17,11 +17,16 @@ public class FileIO {
     private String lastLine;
 
     private int currentLine;
-    
-    private boolean isOpened;
+
+    private boolean writerOpened;
+    private boolean readerOpened;
 
     public FileIO(File defaultFile) {
         this.file = defaultFile;
+    }
+
+    public FileIO(String defaultFilePath) {
+        setFile(defaultFilePath);
     }
 
     public FileIO() {
@@ -35,45 +40,33 @@ public class FileIO {
     }
 
     public boolean closeFile() {
-        if (!isOpened) {
-            return false;
-        }
-        try {
-            reader.close();
-            writer.close();
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            System.err.println("Failed closing file: " + file.getName());
-            return false;
-        }
-        isOpened = false;
+        closeReader();
+        closeWriter();
         return true;
     }
 
-    private boolean openFile() {
-        if (isOpened) {
-            return false;
-        }
-        try {
-            reader = new BufferedReader(new FileReader(file));
-            writer = new BufferedWriter(new FileWriter(file));
-            currentLine = 1;
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            System.err.println("Failed opening file: " + file.getName());
-            return false;
-        }
-        isOpened = true;
+    public boolean openFile(boolean append) {
+        openReader();
+        openWriter(append);
         return true;
     }
 
     public boolean createPathToFile() {
-        return file.mkdirs();
+        if (file == null) {
+            return false;
+        }
+
+        File parent = file.getParentFile();
+        if (parent == null) {
+            return false;
+        }
+
+        return parent.mkdirs();
     }
 
     public boolean writeLine(String line, boolean newLine) {
-        if (!isOpened) {
-            openFile();
+        if (!writerOpened) {
+            openWriter(false);
         }
         try {
             if (newLine) {
@@ -89,10 +82,7 @@ public class FileIO {
     }
 
     public boolean writeFile(ArrayList<String> data) {
-        if (!isOpened) {
-            openFile();
-        }
-        restartWriter(true);
+        restartWriter(false);
         boolean first = true;
         for (String s : data) {
             if (first) {
@@ -106,8 +96,8 @@ public class FileIO {
     }
 
     public String readLine() {
-        if (!isOpened) {
-            openFile();
+        if (!readerOpened) {
+            openReader();
         }
         try {
             lastLine = reader.readLine();
@@ -120,10 +110,10 @@ public class FileIO {
     }
 
     public ArrayList<String> readFile() {
-        if (!isOpened) {
-            openFile();
+        if (!readerOpened) {
+            openReader();
         }
-        if(currentLine > 1) {
+        if (currentLine > 1) {
             restartReader();
         }
         ArrayList<String> data = new ArrayList<>(5);
@@ -134,6 +124,7 @@ public class FileIO {
     }
 
     public boolean delete() {
+        closeFile();
         if (file.isDirectory()) {
             for (File tmpFile : file.listFiles()) {
                 new FileIO(tmpFile).delete();
@@ -142,23 +133,66 @@ public class FileIO {
         return file.delete();
     }
 
-    private void restartWriter(boolean clearFile) {
-        try {
-            writer.close();
-            writer = new BufferedWriter(new FileWriter(file, !clearFile));
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            System.err.println("Failed restarting writer on file: " + file.getName());
-        }
+    private void restartWriter(boolean append) {
+        closeWriter();
+        openWriter(append);
     }
 
     private void restartReader() {
+        closeReader();
+        openReader();
+    }
+
+    private void closeReader() {
+        if (!readerOpened) {
+            return;
+        }
         try {
             reader.close();
-            reader = new BufferedReader(new FileReader(file));
+            readerOpened = false;
         } catch (IOException e) {
             System.err.println(e.getMessage());
-            System.err.println("Failed restarting reader on file: " + file.getName());
+            System.err.println("Failed closing reader on file: " + file.getName());
+        }
+    }
+
+    private void openReader() {
+        if (readerOpened) {
+            closeReader();
+        }
+        try {
+            reader = new BufferedReader(new FileReader(file));
+            currentLine = 1;
+            readerOpened = true;
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            System.err.println("Failed opening reader on file: " + file.getName());
+        }
+    }
+
+    private void closeWriter() {
+        if (!writerOpened) {
+            return;
+        }
+        try {
+            writer.close();
+            writerOpened = false;
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            System.err.println("Failed closing writer on file: " + file.getName());
+        }
+    }
+
+    private void openWriter(boolean append) {
+        if (writerOpened) {
+            closeWriter();
+        }
+        try {
+            writer = new BufferedWriter(new FileWriter(file, append));
+            writerOpened = true;
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            System.err.println("Failed opening writer on file: " + file.getName());
         }
     }
 
