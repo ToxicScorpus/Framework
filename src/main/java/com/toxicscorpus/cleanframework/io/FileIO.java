@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class FileIO {
 
@@ -81,7 +82,7 @@ public class FileIO {
         return true;
     }
 
-    public boolean writeFile(ArrayList<String> data) {
+    public boolean writeFile(List<String> data) {
         restartWriter(false);
         boolean first = true;
         for (String s : data) {
@@ -109,14 +110,14 @@ public class FileIO {
         return lastLine;
     }
 
-    public ArrayList<String> readFile() {
+    public List<String> readFile() {
         if (!readerOpened) {
             openReader();
         }
         if (currentLine > 1) {
             restartReader();
         }
-        ArrayList<String> data = new ArrayList<>(5);
+        List<String> data = new ArrayList<>(4);
         while (readLine() != null) {
             data.add(lastLine);
         }
