@@ -2,8 +2,8 @@ package com.toxicscorpus.cleanframework.io.connection;
 
 public class BasicServer {
 
-    private MessageHandler handler;
-    private Server server;
+    private final MessageHandler handler;
+    private final Server server;
 
     public BasicServer(int port, MessageHandler handler) {
         server = new Server();

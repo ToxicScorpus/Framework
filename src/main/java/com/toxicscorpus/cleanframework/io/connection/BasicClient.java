@@ -2,10 +2,11 @@ package com.toxicscorpus.cleanframework.io.connection;
 
 public class BasicClient {
     
-    private Client client;
+    private final Client client;
+    private final MessageHandler asyncMessageHandler;
+    
     private String lastMessage;
     private boolean awaitsRespone;
-    private MessageHandler asyncMessageHandler;
 
     public BasicClient(String host, int port, MessageHandler asyncMessageHandler) {
         this.asyncMessageHandler = asyncMessageHandler;

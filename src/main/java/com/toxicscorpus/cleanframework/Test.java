@@ -5,6 +5,9 @@ import com.toxicscorpus.cleanframework.io.connection.BasicServer;
 import com.toxicscorpus.cleanframework.io.connection.ClientMessage;
 import com.toxicscorpus.cleanframework.io.file.FileData;
 import com.toxicscorpus.cleanframework.io.file.FileIO;
+import com.toxicscorpus.cleanframework.io.website.BufferedWebsiteIO;
+import com.toxicscorpus.cleanframework.io.website.WebIO;
+import com.toxicscorpus.cleanframework.io.website.WebsiteIO;
 
 public class Test {
 
@@ -12,6 +15,8 @@ public class Test {
         Test_FileIO();
         Test_FileData();
         Test_Server_Client();
+        Test_WebsiteIO();
+        System.exit(0);
     }
 
     private static void Test_FileIO() {
@@ -61,6 +66,24 @@ public class Test {
         } else if (msg.getText().equals("close")) {
             System.out.println("Closing NOW!");
         }
+    }
+
+    private static void Test_WebsiteIO() {
+        WebIO webIO = new WebsiteIO();
+        webIO.setSite("https://www.wikipedia.de/");
+        System.out.println(webIO.readNextLine());
+        System.out.println(webIO.nextLineWithArrtibute("id", "mainbox"));
+        System.out.println(webIO.nextLineWithTagAndArrtibute("a", "href", "https://twitter.com/wikimediade"));
+        System.out.println(webIO.nextLineThatContains("type"));
+        webIO.close();
+
+        WebIO buffered = new BufferedWebsiteIO();
+        buffered.setSite("https://www.wikipedia.de/");
+        System.out.println(buffered.readNextLine());
+        System.out.println(buffered.nextLineWithArrtibute("id", "mainbox"));
+        System.out.println(buffered.nextLineWithTagAndArrtibute("a", "href", "https://twitter.com/wikimediade"));
+        System.out.println(buffered.nextLineThatContains("type"));
+        buffered.close();
     }
 
 }

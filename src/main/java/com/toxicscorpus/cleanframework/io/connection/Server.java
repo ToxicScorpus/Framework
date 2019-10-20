@@ -12,7 +12,7 @@ public class Server {
 
     private ServerSocket server;
 
-    private List<ServerClient> clients;
+    private final List<ServerClient> clients;
 
     public Server() {
         clients = new ArrayList<>();
@@ -42,7 +42,7 @@ public class Server {
             ServerClient client = new ServerClient(socket);
             client.setServer(this);
             clients.add(client);
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
             System.err.println("[Server] Failed waiting for connection!");
             return false;

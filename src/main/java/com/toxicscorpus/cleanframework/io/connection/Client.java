@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class Client {
-    
+
     protected boolean connected;
 
     protected BufferedWriter writer;
@@ -49,7 +49,7 @@ public class Client {
             closeReader();
             connection.close();
             connected = false;
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
             System.err.println("[Client] Failed closing connection");
             return false;
@@ -101,7 +101,7 @@ public class Client {
             writer.write(text);
             writer.newLine();
             writer.flush();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
             System.err.println("[Client] Failed sending line: " + text);
         }
@@ -113,7 +113,7 @@ public class Client {
         }
         try {
             lastLine = reader.readLine();
-        } catch (Exception e) {
+        } catch (IOException e) {
             System.err.println(e.getMessage());
             System.err.println("[Client] Failed receiving line!");
             return null;
