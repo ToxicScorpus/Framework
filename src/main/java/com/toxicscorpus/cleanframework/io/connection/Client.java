@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class Client {
-
+    
     protected boolean connected;
 
     protected BufferedWriter writer;
@@ -57,7 +57,7 @@ public class Client {
         return true;
     }
 
-    protected void openWriter() {
+    private void openWriter() {
         try {
             writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()));
         } catch (IOException e) {
@@ -66,7 +66,7 @@ public class Client {
         }
     }
 
-    protected void openReader() {
+    private void openReader() {
         try {
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         } catch (IOException e) {
@@ -75,7 +75,7 @@ public class Client {
         }
     }
 
-    protected void closeWriter() {
+    private void closeWriter() {
         try {
             writer.close();
         } catch (IOException e) {
@@ -84,7 +84,7 @@ public class Client {
         }
     }
 
-    protected void closeReader() {
+    private void closeReader() {
         try {
             reader.close();
         } catch (IOException e) {
@@ -94,6 +94,9 @@ public class Client {
     }
 
     public void sendLine(String text) {
+        if (!connected) {
+            return;
+        }
         try {
             writer.write(text);
             writer.newLine();
@@ -105,13 +108,21 @@ public class Client {
     }
 
     public String receiveLine() {
+        if (!connected) {
+            return null;
+        }
         try {
             lastLine = reader.readLine();
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            System.err.println("[Client] Failed receiving line: " + lastLine);
+            System.err.println("[Client] Failed receiving line!");
+            return null;
         }
         return lastLine;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 
 }

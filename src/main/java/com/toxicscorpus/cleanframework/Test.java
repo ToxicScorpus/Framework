@@ -1,15 +1,16 @@
 package com.toxicscorpus.cleanframework;
 
-import com.toxicscorpus.cleanframework.io.connection.Client;
-import com.toxicscorpus.cleanframework.io.connection.Server;
+import com.toxicscorpus.cleanframework.io.connection.BasicClient;
+import com.toxicscorpus.cleanframework.io.connection.BasicServer;
+import com.toxicscorpus.cleanframework.io.connection.ClientMessage;
 import com.toxicscorpus.cleanframework.io.file.FileData;
 import com.toxicscorpus.cleanframework.io.file.FileIO;
 
 public class Test {
 
     public static void main(String[] args) {
-//        Test_FileIO();
-//        Test_FileData();
+        Test_FileIO();
+        Test_FileData();
         Test_Server_Client();
     }
 
@@ -37,42 +38,28 @@ public class Test {
         System.out.println(data.getData("name"));
         System.out.println(data.getData("pass"));
     }
-    
+
     private static void Test_Server_Client() {
-        Server server = new Server();
-        server.openServer(8888);
-        new Thread(() -> Server_Listen(server)).start();
-        Client client1 = new Client();
-        client1.connect("localhost", 8888);
-        
-        Client client2 = new Client();
-        client2.connect("localhost", 8888);
-        
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-        }
-        
-        Client serverClient1 = server.getClient(0);
-        Client serverClient2 = server.getClient(1);
-        
-        client1.sendLine("TestClient1");
-        System.out.println(serverClient1.receiveLine());
-        
-        client2.sendLine("TestClient2");
-        System.out.println(serverClient2.receiveLine());
-        
-        server.sendLineToAll("TestBroadcast");
-        System.out.println(client1.receiveLine());
-        System.out.println(client2.receiveLine());
-        
-        client2.disconnect();
-        client1.disconnect();
-        server.closeServer();
+        BasicServer server = new BasicServer(8888, Test::handle);
+        BasicClient client = new BasicClient("localhost", 8888, Test::handle);
+        BasicClient client2 = new BasicClient("localhost", 8888, Test::handle);
+        System.out.println(client.sendWithResponse("Command1"));
+        System.out.println(client.sendWithResponse("Command2"));
+        client.send("output 120");
+        client2.send("output client2");
+        server.broadcast("close");
+        server.stop();
     }
-    
-    private static void Server_Listen(Server server) {
-        while(server.waitForConnection()) {
+
+    private static void handle(ClientMessage msg) {
+        if (msg.getText().equals("Command1")) {
+            msg.getClient().sendLine("Command1 Response!");
+        } else if (msg.getText().equals("Command2")) {
+            msg.getClient().sendLine("Command2 Response!");
+        } else if (msg.getText().startsWith("output")) {
+            System.out.println(msg.getText().split(" ")[1]);
+        } else if (msg.getText().equals("close")) {
+            System.out.println("Closing NOW!");
         }
     }
 

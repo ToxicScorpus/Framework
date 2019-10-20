@@ -64,8 +64,8 @@ public class Server {
     }
 
     private void closeAllClients() {
-        for (int i = 0; i < clients.size(); i++) {
-            clients.get(i).disconnect();
+        while (clients.size() > 0) {
+            clients.get(0).disconnect();
         }
     }
 
@@ -76,7 +76,10 @@ public class Server {
     }
 
     public void removeClient(ServerClient client) {
-        clients.remove(client);
+        try {
+            clients.remove(client);
+        } catch (Exception e) {
+        }
     }
 
     public ServerClient getClient(int index) {
