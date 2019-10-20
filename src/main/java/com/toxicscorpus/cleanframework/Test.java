@@ -1,13 +1,16 @@
 package com.toxicscorpus.cleanframework;
 
-import com.toxicscorpus.cleanframework.io.FileData;
-import com.toxicscorpus.cleanframework.io.FileIO;
+import com.toxicscorpus.cleanframework.io.connection.Client;
+import com.toxicscorpus.cleanframework.io.connection.Server;
+import com.toxicscorpus.cleanframework.io.file.FileData;
+import com.toxicscorpus.cleanframework.io.file.FileIO;
 
 public class Test {
 
     public static void main(String[] args) {
-        Test_FileIO();
-        Test_FileData();
+//        Test_FileIO();
+//        Test_FileData();
+        Test_Server_Client();
     }
 
     private static void Test_FileIO() {
@@ -33,6 +36,44 @@ public class Test {
         System.out.println(data.getData("url"));
         System.out.println(data.getData("name"));
         System.out.println(data.getData("pass"));
+    }
+    
+    private static void Test_Server_Client() {
+        Server server = new Server();
+        server.openServer(8888);
+        new Thread(() -> Server_Listen(server)).start();
+        Client client1 = new Client();
+        client1.connect("localhost", 8888);
+        
+        Client client2 = new Client();
+        client2.connect("localhost", 8888);
+        
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+        
+        Client serverClient1 = server.getClient(0);
+        Client serverClient2 = server.getClient(1);
+        
+        client1.sendLine("TestClient1");
+        System.out.println(serverClient1.receiveLine());
+        
+        client2.sendLine("TestClient2");
+        System.out.println(serverClient2.receiveLine());
+        
+        server.sendLineToAll("TestBroadcast");
+        System.out.println(client1.receiveLine());
+        System.out.println(client2.receiveLine());
+        
+        client2.disconnect();
+        client1.disconnect();
+        server.closeServer();
+    }
+    
+    private static void Server_Listen(Server server) {
+        while(server.waitForConnection()) {
+        }
     }
 
 }

@@ -1,4 +1,4 @@
-package com.toxicscorpus.cleanframework.io;
+package com.toxicscorpus.cleanframework.io.file;
 
 public class Data {
 
